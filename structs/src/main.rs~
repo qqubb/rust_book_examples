@@ -1,0 +1,88 @@
+// Defining and Instantiating Structs
+// in a struct you’ll name each piece of data so it’s clear what the values mean
+
+// inside curly brackets, we define the names and types of the pieces of data, which we call fields
+
+struct User {
+    active: bool,
+    username: String,
+    email: String,
+    sign_in_count: u64,
+}
+
+// To use a struct after we’ve defined it, 
+// we create an instance of that struct 
+// by specifying concrete values for each of the fields
+
+fn main() {
+    // let user1 = User {
+	let mut user1 = User {
+        email: String::from("someone@example.com"),
+        username: String::from("someusername123"),
+        active: true,
+        sign_in_count: 1,
+    };
+	
+	// To get a specific value from a struct, we use dot notationv
+	// If the instance is mutable, 
+	// we can change a value by using the dot notation and 
+	// assigning into a particular field.
+	user1.email = String::from("anotheremail@example.com");
+	
+	// Struct Update Syntax
+    let user2 = User {
+        active: user1.active,
+        username: user1.username,
+        email: String::from("another@example.com"),
+        sign_in_count: user1.sign_in_count,
+    };	
+		
+	// Using struct update syntax, we can achieve the same effect with less code:
+	let user2 = User {
+        email: String::from("another@example.com"),
+        ..user1 // The syntax .. specifies that the remaining fields not explicitly set should have the same value as the fields in the given instance.
+    }; // we can no longer use user1 after creating user2 because the String in the username field of user1 was moved into user2
+	
+	// tuple structs
+	let black = Color(0, 0, 0);
+    let origin = Point(0, 0, 0);
+}
+
+fn build_user(email: String, username: String) -> User {
+    User {
+        email: email,
+        username: username,
+        active: true,
+        sign_in_count: 1,
+    }
+}
+
+// Listing 5-4: A build_user function that takes an email and username and returns a User instance
+
+// It makes sense to name the function parameters with the same name as the struct fields, but having to repeat the email and username field names and variables is a bit tedious. If the struct had more fields, repeating each name would get even more annoying. 
+
+// Luckily, there’s a convenient shorthand!
+
+// Using the Field Init Shorthand
+
+// Because the parameter names and the struct field names are exactly the same in Listing 5-4, we can use the 
+
+// field init shorthand 
+
+// syntax to rewrite build_user so that it behaves exactly the same but doesn’t have the repetition of email and username, as shown in Listing 5-5.
+
+fn build_user(email: String, username: String) -> User {
+    User {
+        email, // doesn’t have the repetition of email and username
+        username, // doesn’t have the repetition of email and username
+        active: true,
+        sign_in_count: 1,
+    }
+}
+
+// tuple structs
+// Each struct you define is its own type, 
+// even though the fields within the struct might have the same types
+
+struct Color(i32, i32, i32);
+struct Point(i32, i32, i32);

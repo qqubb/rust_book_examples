@@ -1,0 +1,111 @@
+// Listing 16-7: Moving tx to a spawned thread and sending “hi”
+/*
+use std::sync::mpsc;
+use std::thread;
+
+fn main() {
+
+    let (tx, rx) = mpsc::channel();
+
+    thread::spawn(move || {
+    
+        let val = String::from("hi");
+        
+        // The transmitter has a send method that takes the value we want to send. 
+        // The send method returns a Result<T, E> type
+        // we’re calling unwrap to panic in case of an error
+        tx.send(val).unwrap();
+        
+    });
+
+    // Listing 16-8: Receiving the value “hi” in the main thread and printing it
+    // recv, short for receive, which will block the main thread’s execution and 
+    // wait until a value is sent down the channel. 
+    // Once a value is sent, recv will return it in a Result<T, E>
+    let received = rx.recv().unwrap();
+    println!("Got: {}", received);    
+        
+}
+*/
+
+/*
+// Listing 16-10: Sending multiple messages and pausing between each
+use std::sync::mpsc;
+use std::thread;
+use std::time::Duration;
+
+fn main() {
+    let (tx, rx) = mpsc::channel();
+
+    thread::spawn(move || {
+        let vals = vec![
+            String::from("hi"),
+            String::from("from"),
+            String::from("the"),
+            String::from("thread"),
+        ];
+
+        for val in vals {
+            tx.send(val).unwrap();
+            thread::sleep(Duration::from_secs(3));
+        }
+    });
+    
+    // In the main thread, we’re not calling the recv function explicitly anymore: 
+    // instead, we’re treating rx as an iterator
+    for received in rx {
+        println!("Got: {}", received);
+    }
+}*/
+
+// Listing 16-11: Sending multiple messages from multiple producers
+
+use std::sync::mpsc;
+use std::thread;
+use std::time::Duration;
+
+fn main() {
+    // --snip--
+
+    let (tx, rx) = mpsc::channel();
+
+    // This time, before we create the first spawned thread, 
+    // we call clone on the transmitter. 
+    // This will give us a new transmitter we can pass to the first spawned thread. 
+    // We pass the original transmitter to a second spawned thread. 
+    // This gives us two threads, each sending different messages to the one receiver.
+    let tx1 = tx.clone();
+    thread::spawn(move || {
+        let vals = vec![
+            String::from("hi"),
+            String::from("from"),
+            String::from("the"),
+            String::from("thread"),
+        ];
+
+        for val in vals {
+            tx1.send(val).unwrap();
+            thread::sleep(Duration::from_secs(1));
+        }
+    });
+
+    thread::spawn(move || {
+        let vals = vec![
+            String::from("more"),
+            String::from("messages"),
+            String::from("for"),
+            String::from("you"),
+        ];
+
+        for val in vals {
+            tx.send(val).unwrap();
+            thread::sleep(Duration::from_secs(1));
+        }
+    });
+
+    for received in rx {
+        println!("Got: {}", received);
+    }
+
+    // --snip--
+}
